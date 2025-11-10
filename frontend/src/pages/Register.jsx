@@ -22,16 +22,26 @@ const Register = () => {
   const [qrData, setQrData] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
+    gender: '',
     age: '',
+    heightCm: '',
+    weightKg: '',
     bloodGroup: '',
     medicalHistory: '',
+    currentMedications: '',
+    chronicConditions: '',
     allergies: '',
     emergencyContact: {
       name: '',
       phone: '',
       relationship: ''
     },
-    address: ''
+    address: '',
+    primaryPhysician: {
+      name: '',
+      phone: '',
+      hospital: ''
+    }
   });
 
   const handleChange = (e) => {
@@ -42,6 +52,15 @@ const Register = () => {
         ...prev,
         emergencyContact: {
           ...prev.emergencyContact,
+          [field]: value
+        }
+      }));
+    } else if (name.startsWith('primaryPhysician.')) {
+      const field = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        primaryPhysician: {
+          ...prev.primaryPhysician,
           [field]: value
         }
       }));
@@ -59,7 +78,14 @@ const Register = () => {
 
     try {
       // Register user
-      const registerResponse = await axios.post(`${API_URL}/user/register`, formData);
+      const payload = {
+        ...formData,
+        // coerce numeric fields
+        age: Number(formData.age),
+        heightCm: formData.heightCm ? Number(formData.heightCm) : undefined,
+        weightKg: formData.weightKg ? Number(formData.weightKg) : undefined
+      };
+      const registerResponse = await axios.post(`${API_URL}/user/register`, payload);
       const userId = registerResponse.data.data._id;
 
       // Generate QR code
@@ -123,6 +149,24 @@ const Register = () => {
               />
             </div>
 
+            {/* Gender */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Gender
+              </label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Prefer not to say</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
             {/* Age */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -138,6 +182,38 @@ const Register = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your age"
               />
+            </div>
+
+            {/* Height and Weight */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Height (cm)
+                </label>
+                <input
+                  type="number"
+                  name="heightCm"
+                  value={formData.heightCm}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 175"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Weight (kg)
+                </label>
+                <input
+                  type="number"
+                  name="weightKg"
+                  value={formData.weightKg}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 70"
+                />
+              </div>
             </div>
 
             {/* Blood Group */}
@@ -163,6 +239,36 @@ const Register = () => {
                 <option value="O-">O-</option>
                 <option value="Unknown">Unknown</option>
               </select>
+            </div>
+
+            {/* Current Medications */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Medications
+              </label>
+              <textarea
+                name="currentMedications"
+                value={formData.currentMedications}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="List regular medications and dosages"
+              />
+            </div>
+
+            {/* Chronic Conditions */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Chronic Conditions
+              </label>
+              <textarea
+                name="chronicConditions"
+                value={formData.chronicConditions}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., Diabetes, Hypertension, Asthma"
+              />
             </div>
 
             {/* Emergency Contact Name */}
@@ -240,6 +346,39 @@ const Register = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Any relevant medical conditions or history"
               />
+            </div>
+
+            {/* Primary Physician */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Primary Physician
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input
+                  type="text"
+                  name="primaryPhysician.name"
+                  value={formData.primaryPhysician.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Name"
+                />
+                <input
+                  type="tel"
+                  name="primaryPhysician.phone"
+                  value={formData.primaryPhysician.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Phone"
+                />
+                <input
+                  type="text"
+                  name="primaryPhysician.hospital"
+                  value={formData.primaryPhysician.hospital}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Hospital/Clinic"
+                />
+              </div>
             </div>
 
             {/* Address */}

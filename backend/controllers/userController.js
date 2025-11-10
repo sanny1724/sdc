@@ -6,12 +6,18 @@ export const registerUser = async (req, res) => {
   try {
     const {
       name,
+      gender,
       age,
+      heightCm,
+      weightKg,
       bloodGroup,
       medicalHistory,
+      currentMedications,
+      chronicConditions,
       allergies,
       emergencyContact,
-      address
+      address,
+      primaryPhysician
     } = req.body;
 
     // Validation
@@ -24,12 +30,18 @@ export const registerUser = async (req, res) => {
 
     const user = new User({
       name,
+      gender: gender || '',
       age,
+      heightCm: typeof heightCm === 'number' ? heightCm : undefined,
+      weightKg: typeof weightKg === 'number' ? weightKg : undefined,
       bloodGroup,
       medicalHistory: medicalHistory || '',
+      currentMedications: currentMedications || '',
+      chronicConditions: chronicConditions || '',
       allergies: allergies || '',
       emergencyContact,
-      address: address || ''
+      address: address || '',
+      primaryPhysician: primaryPhysician || {}
     });
 
     await user.save();

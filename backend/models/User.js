@@ -6,10 +6,25 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other', 'Prefer not to say', ''],
+    default: ''
+  },
   age: {
     type: Number,
     required: true,
     min: 0
+  },
+  heightCm: {
+    type: Number,
+    min: 0,
+    default: undefined
+  },
+  weightKg: {
+    type: Number,
+    min: 0,
+    default: undefined
   },
   bloodGroup: {
     type: String,
@@ -17,6 +32,14 @@ const userSchema = new mongoose.Schema({
     enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
   },
   medicalHistory: {
+    type: String,
+    default: ''
+  },
+  currentMedications: {
+    type: String,
+    default: ''
+  },
+  chronicConditions: {
     type: String,
     default: ''
   },
@@ -37,6 +60,11 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: ''
     }
+  },
+  primaryPhysician: {
+    name: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    hospital: { type: String, default: '' }
   },
   address: {
     type: String,

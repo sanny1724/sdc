@@ -6,6 +6,7 @@ import {
   updateUser,
   deleteUser
 } from '../controllers/userController.js';
+import { requireAdmin } from '../middleware/authAdmin.js';
 
 const router = express.Router();
 
@@ -13,16 +14,16 @@ const router = express.Router();
 router.post('/register', registerUser);
 
 // GET /api/user/all - Get all users (must be before /:id route)
-router.get('/all', getAllUsers);
+router.get('/all', requireAdmin, getAllUsers);
 
 // GET /api/user/:id - Get user by ID (public emergency profile)
 router.get('/:id', getUserById);
 
 // PUT /api/user/:id - Update user
-router.put('/:id', updateUser);
+router.put('/:id', requireAdmin, updateUser);
 
 // DELETE /api/user/:id - Delete user
-router.delete('/:id', deleteUser);
+router.delete('/:id', requireAdmin, deleteUser);
 
 export default router;
 
