@@ -88,12 +88,26 @@ const AllUsers = () => {
           <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600">{error}</p>
-          <button
-            onClick={fetchAllUsers}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <button
+              onClick={fetchAllUsers}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => {
+                const key = prompt('Enter Admin Key (will be saved locally):');
+                if (key) {
+                  localStorage.setItem('ADMIN_API_KEY', key);
+                  window.location.reload();
+                }
+              }}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Set Admin Key
+            </button>
+          </div>
         </div>
       </div>
     );
