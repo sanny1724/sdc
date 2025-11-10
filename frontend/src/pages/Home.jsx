@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, QrCode, ShieldPlus } from 'lucide-react';
 import axios from 'axios';
@@ -136,45 +137,7 @@ const Home = () => {
             animate="visible"
             className="hidden md:flex items-center justify-center"
           >
-            <div className="relative">
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="p-6 rounded-2xl bg-white/80 backdrop-blur shadow-xl ring-1 ring-gray-200"
-              >
-                {/* Simple QR-like SVG */}
-                <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g" x1="0" x2="1">
-                      <stop offset="0%" stopColor="#6366F1" />
-                      <stop offset="100%" stopColor="#8B5CF6" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="0" y="0" width="220" height="220" rx="20" fill="url(#g)" opacity="0.1" />
-                  <rect x="20" y="20" width="60" height="60" fill="#111827" rx="8" />
-                  <rect x="30" y="30" width="40" height="40" fill="white" rx="6" />
-                  <rect x="40" y="40" width="20" height="20" fill="#111827" rx="4" />
-
-                  <rect x="140" y="20" width="60" height="60" fill="#111827" rx="8" />
-                  <rect x="150" y="30" width="40" height="40" fill="white" rx="6" />
-                  <rect x="160" y="40" width="20" height="20" fill="#111827" rx="4" />
-
-                  <rect x="20" y="140" width="60" height="60" fill="#111827" rx="8" />
-                  <rect x="30" y="150" width="40" height="40" fill="white" rx="6" />
-                  <rect x="40" y="160" width="20" height="20" fill="#111827" rx="4" />
-
-                  {/* Random QR blocks */}
-                  <rect x="100" y="20" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="120" y="60" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="100" y="100" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="140" y="100" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="120" y="140" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="100" y="180" width="20" height="20" fill="#111827" rx="4" />
-                  <rect x="180" y="100" width="20" height="20" fill="#111827" rx="4" />
-                </svg>
-              </motion.div>
-              <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-indigo-200/50 via-purple-200/50 to-cyan-200/50 blur-2xl" />
-            </div>
+            <FancyQR />
           </motion.div>
         </div>
 
@@ -295,3 +258,112 @@ export default Home;
 
 /* Tailwind keyframes for shimmer */
 /* Add via existing Tailwind config defaults; inline utility used above */
+
+// Enhanced QR Hologram component
+const FancyQR = () => {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top) / rect.height;
+    const rotateY = (px - 0.5) * 14; // left-right
+    const rotateX = (0.5 - py) * 14; // up-down
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  const resetTilt = () => setTilt({ x: 0, y: 0 });
+
+  return (
+    <div
+      onMouseMove={handleMove}
+      onMouseLeave={resetTilt}
+      className="relative"
+      style={{ perspective: 1000 }}
+    >
+      {/* Rotating halo ring */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-6 -z-10 rounded-[2rem] opacity-60"
+        style={{
+          background:
+            'conic-gradient(from 0deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15), rgba(20,184,166,0.15), rgba(99,102,241,0.15))'
+        }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+      />
+
+      {/* Outer glow */}
+      <div className="absolute -inset-3 -z-10 rounded-[1.75rem] bg-gradient-to-tr from-cyan-300/30 via-purple-300/25 to-indigo-300/30 blur-2xl" />
+
+      {/* Card with tilt */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        className="rounded-3xl p-6 bg-white/10 backdrop-blur-xl shadow-2xl ring-1 ring-white/20"
+        style={{
+          transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+          transformStyle: 'preserve-3d'
+        }}
+      >
+        {/* Glass top reflection */}
+        <div
+          className="pointer-events-none absolute inset-0 rounded-3xl"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0) 60%)'
+          }}
+        />
+
+        {/* QR canvas with soft border gradient */}
+        <div className="relative rounded-2xl p-3 bg-gradient-to-tr from-white/30 to-white/5">
+          <div className="rounded-xl bg-[#0B1020] p-3 ring-1 ring-white/10">
+            {/* Decorative grid behind QR */}
+            <div className="absolute inset-0 rounded-xl pointer-events-none opacity-20 [mask-image:radial-gradient(white,transparent_70%)]"
+                 style={{ backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,.08) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+
+            {/* QR Illustration */}
+            <svg width="240" height="240" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" className="relative">
+              <defs>
+                <linearGradient id="qrGrad" x1="0" x2="1">
+                  <stop offset="0%" stopColor="#4F46E5" />
+                  <stop offset="50%" stopColor="#9333EA" />
+                  <stop offset="100%" stopColor="#14B8A6" />
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="220" height="220" rx="22" fill="url(#qrGrad)" opacity="0.12" />
+              <rect x="20" y="20" width="60" height="60" fill="#0B1020" rx="8" />
+              <rect x="30" y="30" width="40" height="40" fill="white" rx="6" />
+              <rect x="40" y="40" width="20" height="20" fill="#0B1020" rx="4" />
+
+              <rect x="140" y="20" width="60" height="60" fill="#0B1020" rx="8" />
+              <rect x="150" y="30" width="40" height="40" fill="white" rx="6" />
+              <rect x="160" y="40" width="20" height="20" fill="#0B1020" rx="4" />
+
+              <rect x="20" y="140" width="60" height="60" fill="#0B1020" rx="8" />
+              <rect x="30" y="150" width="40" height="40" fill="white" rx="6" />
+              <rect x="40" y="160" width="20" height="20" fill="#0B1020" rx="4" />
+
+              {/* Random QR blocks */}
+              <rect x="100" y="20" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="120" y="60" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="100" y="100" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="140" y="100" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="120" y="140" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="100" y="180" width="20" height="20" fill="#0B1020" rx="4" />
+              <rect x="180" y="100" width="20" height="20" fill="#0B1020" rx="4" />
+            </svg>
+
+            {/* Holographic scanline */}
+            <motion.div
+              className="pointer-events-none absolute left-3 right-3 h-10 rounded bg-gradient-to-b from-white/5 via-white/30 to-white/5"
+              animate={{ top: ['16%', '78%', '16%'] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ filter: 'blur(1px)' }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
