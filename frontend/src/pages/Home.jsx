@@ -85,6 +85,8 @@ const Home = () => {
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        {/* compute admin in render */}
+        {(() => { /* noop IIFE for inline logic */ return null; })()}
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -146,18 +148,20 @@ const Home = () => {
           >
             Register Now
           </Link>
-          <button
-            onClick={downloadCsv}
-            className="relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border-2 border-emerald-400 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:border-emerald-500"
-          >
-            <span className="absolute inset-0 bg-gradient-to-r from-emerald-100/0 via-emerald-100/40 to-emerald-100/0 animate-[shimmer_2s_infinite] pointer-events-none" />
-            <span className="inline-flex items-center gap-2">
-              <svg className="w-5 h-5 text-emerald-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
-              </svg>
-              Download Users (Excel CSV)
-            </span>
-          </button>
+          {(localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY) && (
+            <button
+              onClick={downloadCsv}
+              className="relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border-2 border-emerald-400 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:border-emerald-500"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-emerald-100/0 via-emerald-100/40 to-emerald-100/0 animate-[shimmer_2s_infinite] pointer-events-none" />
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-5 h-5 text-emerald-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                </svg>
+                Download Users (Excel CSV)
+              </span>
+            </button>
+          )}
           <Link
             to="/about"
             className="w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-semibold text-lg hover:bg-gray-50 transition-all shadow-lg"
