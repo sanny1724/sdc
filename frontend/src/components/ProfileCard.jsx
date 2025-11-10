@@ -16,7 +16,10 @@ const ProfileCard = ({ user }) => {
           </span>
         </div>
         <h2 className="text-3xl font-bold text-gray-800">{user.name}</h2>
-        <p className="text-gray-600 mt-2">Age: {user.age} years</p>
+        <div className="text-gray-600 mt-2 space-x-2">
+          {typeof user.age !== 'undefined' && <span>Age: {user.age} years</span>}
+          {user.gender && <span>• Gender: {user.gender}</span>}
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -25,6 +28,17 @@ const ProfileCard = ({ user }) => {
           <h3 className="font-semibold text-red-800 mb-2">Blood Group</h3>
           <p className="text-2xl font-bold text-red-600">{user.bloodGroup}</p>
         </div>
+
+        {/* Height / Weight */}
+        {(user.heightCm || user.weightKg) && (
+          <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded">
+            <h3 className="font-semibold text-indigo-800 mb-2">Physical Details</h3>
+            <div className="text-gray-800">
+              {user.heightCm && <p>Height: {user.heightCm} cm</p>}
+              {user.weightKg && <p>Weight: {user.weightKg} kg</p>}
+            </div>
+          </div>
+        )}
 
         {/* Emergency Contact */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
@@ -56,11 +70,46 @@ const ProfileCard = ({ user }) => {
           </div>
         )}
 
+        {/* Current Medications */}
+        {user.currentMedications && (
+          <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded">
+            <h3 className="font-semibold text-emerald-800 mb-2">Current Medications</h3>
+            <p className="text-gray-800 whitespace-pre-wrap">{user.currentMedications}</p>
+          </div>
+        )}
+
+        {/* Chronic Conditions */}
+        {user.chronicConditions && (
+          <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+            <h3 className="font-semibold text-orange-800 mb-2">Chronic Conditions</h3>
+            <p className="text-gray-800 whitespace-pre-wrap">{user.chronicConditions}</p>
+          </div>
+        )}
+
         {/* Medical History */}
         {user.medicalHistory && (
           <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
             <h3 className="font-semibold text-purple-800 mb-2">Medical History</h3>
             <p className="text-gray-800 whitespace-pre-wrap">{user.medicalHistory}</p>
+          </div>
+        )}
+
+        {/* Primary Physician */}
+        {(user.primaryPhysician?.name || user.primaryPhysician?.phone || user.primaryPhysician?.hospital) && (
+          <div className="bg-cyan-50 border-l-4 border-cyan-500 p-4 rounded">
+            <h3 className="font-semibold text-cyan-800 mb-2">Primary Physician</h3>
+            <div className="text-gray-800">
+              {user.primaryPhysician?.name && <p><strong>Name:</strong> {user.primaryPhysician.name}</p>}
+              {user.primaryPhysician?.phone && (
+                <p>
+                  <strong>Phone:</strong>{' '}
+                  <a href={`tel:${user.primaryPhysician.phone}`} className="text-blue-600 hover:underline">
+                    {user.primaryPhysician.phone}
+                  </a>
+                </p>
+              )}
+              {user.primaryPhysician?.hospital && <p><strong>Hospital/Clinic:</strong> {user.primaryPhysician.hospital}</p>}
+            </div>
           </div>
         )}
 
