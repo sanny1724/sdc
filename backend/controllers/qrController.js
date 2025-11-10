@@ -54,9 +54,45 @@ export const generateQR = async (req, res) => {
       frontendUrl = frontendUrl.replace('localhost', localIP).replace('127.0.0.1', localIP);
     }
     
-    // Build URL with minimal query fallback so mobile scan can render even if API is unreachable
-    const query = minimal ? `?n=${minimal.n}&bg=${minimal.bg}&ecn=${minimal.ecn}&ecp=${minimal.ecp}` : '';
-    const profileUrl = `${frontendUrl}/profile/${id}${query}`;
+    // Build URL with minimal query fallback so mobile scan can render even if API is unreachable,
+    // or optionally inline HTML via data: URL for maximum portability.
+    let profileUrl;
+    const inlineMode = (process.env.QR_INLINE || '').toLowerCase() === 'true';
+    if (inlineMode && minimal) {
+      const html = `
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Life Code – Emergency Profile</title>
+    <style>
+      body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,system-ui,Arial,sans-serif; background:#0b1020; color:#eef2ff; margin:0; padding:32px; }
+      .card { max-width:640px; margin:0 auto; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:24px; backdrop-filter: blur(10px); }
+      h1 { margin:0 0 8px; font-size:28px; background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+      .row { margin:14px 0; padding:14px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+      .label { display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#a5b4fc; margin-bottom:6px; }
+      .value { font-size:18px; color:#e5e7eb; }
+      .tel { color:#93c5fd; text-decoration:none; }
+      .footer { margin-top:16px; font-size:12px; color:#94a3b8; text-align:center; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Emergency Profile</h1>
+      <div class="row"><span class="label">Name</span><span class="value">${decodeURIComponent(minimal.n || '')}</span></div>
+      <div class="row"><span class="label">Blood Group</span><span class="value">${decodeURIComponent(minimal.bg || '')}</span></div>
+      <div class="row"><span class="label">Emergency Contact</span><span class="value">${decodeURIComponent(minimal.ecn || '')}</span></div>
+      <div class="row"><span class="label">Emergency Phone</span><span class="value"><a class="tel" href="tel:${decodeURIComponent(minimal.ecp || '')}">${decodeURIComponent(minimal.ecp || '')}</a></span></div>
+      <div class="footer">Life Code – QR Identification</div>
+    </div>
+  </body>
+</html>`;
+      profileUrl = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+    } else {
+      const query = minimal ? `?n=${minimal.n}&bg=${minimal.bg}&ecn=${minimal.ecn}&ecp=${minimal.ecp}` : '';
+      profileUrl = `${frontendUrl}/profile/${id}${query}`;
+    }
     
     // Generate QR code
     const qrCodeDataURL = await generateQRCode(profileUrl);
