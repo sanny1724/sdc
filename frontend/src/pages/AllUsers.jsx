@@ -23,8 +23,11 @@ const AllUsers = () => {
 
   const fetchAllUsers = async () => {
     const API_URL = getApiUrl();
+    const adminKey = localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY;
     try {
-      const response = await axios.get(`${API_URL}/user/all`);
+      const response = await axios.get(`${API_URL}/user/all`, {
+        headers: adminKey ? { 'x-admin-key': adminKey } : {}
+      });
       if (response.data.success) {
         setUsers(response.data.data);
       } else {
@@ -32,9 +35,38 @@ const AllUsers = () => {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      setError('Error loading users. Make sure the backend is running.');
+      setError('Admin access required or server error. Set admin key and retry.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSetAdminKey = () => {
+    const key = prompt('Enter Admin Key (will be saved locally):');
+    if (key) {
+      localStorage.setItem('ADMIN_API_KEY', key);
+      setLoading(true);
+      setError(null);
+      fetchAllUsers();
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    const API_URL = getApiUrl();
+    const adminKey = localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY;
+    if (!adminKey) {
+      alert('Set admin key first.');
+      return;
+    }
+    if (!confirm('Delete ALL users? This cannot be undone.')) return;
+    try {
+      await axios.delete(`${API_URL}/user`, {
+        headers: { 'x-admin-key': adminKey }
+      });
+      await fetchAllUsers();
+      alert('All users deleted.');
+    } catch (e) {
+      alert('Failed to delete users. Check admin key and try again.');
     }
   };
 
@@ -70,9 +102,25 @@ const AllUsers = () => {
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">All Registered Users</h1>
-          <p className="text-gray-600">Total Users: {users.length}</p>
+        <div className="mb-8 flex items-end justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">All Registered Users</h1>
+            <p className="text-gray-600">Total Users: {users.length}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSetAdminKey}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Set Admin Key
+            </button>
+            <button
+              onClick={handleDeleteAll}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Delete All
+            </button>
+          </div>
         </div>
 
         {users.length === 0 ? (
