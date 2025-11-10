@@ -14,7 +14,8 @@
     "react-router-dom": "^6.20.1",
     "axios": "^1.6.2",
     "framer-motion": "^10.18.0",
-    "lucide-react": "^0.453.0"
+    "lucide-react": "^0.453.0",
+    "lottie-react": "^2.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

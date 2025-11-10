@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, QrCode, ShieldPlus } from 'lucide-react';
+import Lottie from 'lottie-react';
 import axios from 'axios';
 
 // Determine API base
@@ -131,13 +132,8 @@ const Home = () => {
           </div>
 
           {/* Hero Illustration (animated QR) */}
-          <motion.div
-            variants={scaleIn}
-            initial="hidden"
-            animate="visible"
-            className="hidden md:flex items-center justify-center"
-          >
-            <FancyQR />
+          <motion.div variants={scaleIn} initial="hidden" animate="visible" className="hidden md:flex items-center justify-center">
+            <AmbulanceHero />
           </motion.div>
         </div>
 
@@ -364,6 +360,82 @@ const FancyQR = () => {
           </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+// Ambulance + QR combined hero visual
+const AmbulanceHero = () => {
+  const [animData, setAnimData] = useState(null);
+  const [scanned, setScanned] = useState(false);
+
+  useEffect(() => {
+    // Fetch a free ambulance lottie (fallback-friendly)
+    const url = 'https://assets6.lottiefiles.com/packages/lf20_ofa3xwoe.json';
+    fetch(url).then(r => r.json()).then(setAnimData).catch(() => setAnimData(null));
+  }, []);
+
+  return (
+    <div className="relative w-full max-w-md">
+      {/* Siren light wash */}
+      <motion.div
+        aria-hidden="true"
+        className="absolute -inset-10 -z-10 rounded-[2rem] blur-3xl"
+        animate={{ opacity: [0.25, 0.45, 0.25], backgroundPositionX: ['0%', '100%', '0%'] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ background: 'linear-gradient(90deg, rgba(244,63,94,0.25), rgba(59,130,246,0.25), rgba(244,63,94,0.25))', backgroundSize: '200% 100%' }}
+      />
+
+      {/* Driving ambulance */}
+      <motion.div
+        initial={{ x: -160 }}
+        animate={{ x: 0 }}
+        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+        onAnimationComplete={() => {
+          // Trigger a QR pulse after arrival
+          setScanned(true);
+          setTimeout(() => setScanned(false), 1200);
+        }}
+        className="mb-4"
+      >
+        <div className="relative">
+          {animData ? (
+            <Lottie animationData={animData} loop={true} className="w-64 h-40 drop-shadow-[0_8px_30px_rgba(20,184,166,0.25)]" />
+          ) : (
+            // Fallback mini-van SVG if lottie fails
+            <svg className="w-64 h-40" viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="50" width="220" height="70" rx="12" fill="#ffffff" />
+              <rect x="190" y="30" width="60" height="40" rx="8" fill="#ffffff" />
+              <rect x="50" y="65" width="60" height="24" fill="#dbeafe" />
+              <rect x="120" y="65" width="60" height="24" fill="#dbeafe" />
+              <circle cx="90" cy="125" r="16" fill="#111827" />
+              <circle cx="200" cy="125" r="16" fill="#111827" />
+              <rect x="150" y="50" width="18" height="18" fill="#ef4444" />
+              <rect x="156" y="44" width="6" height="30" fill="#ef4444" />
+              <rect x="40" y="95" width="40" height="10" fill="#ef4444" />
+              <rect x="85" y="95" width="140" height="10" fill="#ef4444" />
+            </svg>
+          )}
+          {/* Siren beacon */}
+          <motion.span
+            className="absolute -top-2 left-12 w-5 h-5 rounded-full"
+            animate={{ backgroundColor: ['rgba(244,63,94,0.8)', 'rgba(59,130,246,0.8)', 'rgba(244,63,94,0.8)'] }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ boxShadow: '0 0 20px rgba(255,255,255,0.35)' }}
+          />
+        </div>
+      </motion.div>
+
+      {/* QR with pulse when scanned */}
+      <div className="relative">
+        <FancyQR />
+        <motion.div
+          className="pointer-events-none absolute -inset-4 rounded-[1.75rem] bg-cyan-400/20"
+          animate={{ opacity: scanned ? [0.0, 0.6, 0.0] : 0 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+          style={{ filter: 'blur(12px)' }}
+        />
+      </div>
     </div>
   );
 }
