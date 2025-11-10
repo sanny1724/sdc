@@ -70,6 +70,73 @@ const AllUsers = () => {
     }
   };
 
+  const handleExportCsv = async () => {
+    const API_URL = getApiUrl();
+    const adminKey = localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY;
+    if (!adminKey) {
+      alert('Set admin key first.');
+      return;
+    }
+    try {
+      const res = await axios.get(`${API_URL}/user/all`, { headers: { 'x-admin-key': adminKey } });
+      const users = res.data?.data || [];
+      if (!users.length) {
+        alert('No users to export.');
+        return;
+      }
+      const headers = [
+        'id','name','gender','age','heightCm','weightKg','bloodGroup',
+        'allergies','medicalHistory','currentMedications','chronicConditions',
+        'emergencyContact.name','emergencyContact.phone','emergencyContact.relationship',
+        'primaryPhysician.name','primaryPhysician.phone','primaryPhysician.hospital',
+        'address','createdAt','updatedAt'
+      ];
+      const escapeCsv = (val) => {
+        if (val === null || val === undefined) return '';
+        const s = String(val).replace(/\"/g, '\"\"');
+        return /[\",\\n]/.test(s) ? `\"${s}\"` : s;
+      };
+      const rows = users.map(u => ({
+        id: u._id,
+        name: u.name,
+        gender: u.gender,
+        age: u.age,
+        heightCm: u.heightCm,
+        weightKg: u.weightKg,
+        bloodGroup: u.bloodGroup,
+        allergies: u.allergies,
+        medicalHistory: u.medicalHistory,
+        currentMedications: u.currentMedications,
+        chronicConditions: u.chronicConditions,
+        'emergencyContact.name': u.emergencyContact?.name,
+        'emergencyContact.phone': u.emergencyContact?.phone,
+        'emergencyContact.relationship': u.emergencyContact?.relationship,
+        'primaryPhysician.name': u.primaryPhysician?.name,
+        'primaryPhysician.phone': u.primaryPhysician?.phone,
+        'primaryPhysician.hospital': u.primaryPhysician?.hospital,
+        address: u.address,
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt
+      }));
+      const csv = [
+        headers.join(','),
+        ...rows.map(r => headers.map(h => escapeCsv(r[h])).join(','))
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `lifecode-users-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to export. Check admin key and server status.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen py-12 px-4 flex items-center justify-center">
@@ -127,6 +194,13 @@ const AllUsers = () => {
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
               Set Admin Key
+            </button>
+            <button
+              onClick={handleExportCsv}
+              className="relative overflow-hidden px-4 py-2 bg-white text-gray-700 border-2 border-emerald-400 rounded-lg font-semibold transition-all shadow hover:shadow-lg hover:border-emerald-500"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-emerald-100/0 via-emerald-100/40 to-emerald-100/0 animate-[shimmer_2s_infinite] pointer-events-none" />
+              Export CSV
             </button>
             <button
               onClick={handleDeleteAll}

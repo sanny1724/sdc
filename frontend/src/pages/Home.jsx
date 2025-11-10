@@ -10,77 +10,7 @@ const getApiUrl = () => {
 };
 
 const Home = () => {
-  const downloadCsv = async () => {
-    const API_URL = getApiUrl();
-    const adminKey = localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY;
-    if (!adminKey) {
-      alert('Set admin key first (open All Users → Set Admin Key).');
-      return;
-    }
-    try {
-      const res = await axios.get(`${API_URL}/user/all`, {
-        headers: { 'x-admin-key': adminKey }
-      });
-      const users = res.data?.data || [];
-      if (!users.length) {
-        alert('No users to export.');
-        return;
-      }
-
-      // Flatten users for CSV
-      const headers = [
-        'id','name','gender','age','heightCm','weightKg','bloodGroup',
-        'allergies','medicalHistory','currentMedications','chronicConditions',
-        'emergencyContact.name','emergencyContact.phone','emergencyContact.relationship',
-        'primaryPhysician.name','primaryPhysician.phone','primaryPhysician.hospital',
-        'address','createdAt','updatedAt'
-      ];
-      const escapeCsv = (val) => {
-        if (val === null || val === undefined) return '';
-        const s = String(val).replace(/\"/g, '\"\"');
-        return /[\",\\n]/.test(s) ? `\"${s}\"` : s;
-      };
-      const rows = users.map(u => ({
-        id: u._id,
-        name: u.name,
-        gender: u.gender,
-        age: u.age,
-        heightCm: u.heightCm,
-        weightKg: u.weightKg,
-        bloodGroup: u.bloodGroup,
-        allergies: u.allergies,
-        medicalHistory: u.medicalHistory,
-        currentMedications: u.currentMedications,
-        chronicConditions: u.chronicConditions,
-        'emergencyContact.name': u.emergencyContact?.name,
-        'emergencyContact.phone': u.emergencyContact?.phone,
-        'emergencyContact.relationship': u.emergencyContact?.relationship,
-        'primaryPhysician.name': u.primaryPhysician?.name,
-        'primaryPhysician.phone': u.primaryPhysician?.phone,
-        'primaryPhysician.hospital': u.primaryPhysician?.hospital,
-        address: u.address,
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt
-      }));
-      const csv = [
-        headers.join(','),
-        ...rows.map(r => headers.map(h => escapeCsv(r[h])).join(','))
-      ].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `lifecode-users-${new Date().toISOString().slice(0,10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to export. Check admin key and server status.');
-    }
-  };
+  // No admin-only actions on Home page
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -148,20 +78,7 @@ const Home = () => {
           >
             Register Now
           </Link>
-          {(localStorage.getItem('ADMIN_API_KEY') || import.meta.env.VITE_ADMIN_KEY) && (
-            <button
-              onClick={downloadCsv}
-              className="relative overflow-hidden w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border-2 border-emerald-400 rounded-lg font-semibold text-lg transition-all shadow-lg hover:shadow-xl hover:border-emerald-500"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-emerald-100/0 via-emerald-100/40 to-emerald-100/0 animate-[shimmer_2s_infinite] pointer-events-none" />
-              <span className="inline-flex items-center gap-2">
-                <svg className="w-5 h-5 text-emerald-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
-                </svg>
-                Download Users (Excel CSV)
-              </span>
-            </button>
-          )}
+          
           <Link
             to="/about"
             className="w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-semibold text-lg hover:bg-gray-50 transition-all shadow-lg"
