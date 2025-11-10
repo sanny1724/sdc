@@ -192,3 +192,22 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+// Delete all users (admin only)
+export const deleteAllUsers = async (_req, res) => {
+  try {
+    const result = await User.deleteMany({});
+    res.status(200).json({
+      success: true,
+      message: 'All users removed',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    console.error('Delete all users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting all users',
+      error: error.message
+    });
+  }
+};
+

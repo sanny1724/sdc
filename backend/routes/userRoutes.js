@@ -4,7 +4,8 @@ import {
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  deleteAllUsers
 } from '../controllers/userController.js';
 import { requireAdmin } from '../middleware/authAdmin.js';
 
@@ -15,6 +16,9 @@ router.post('/register', registerUser);
 
 // GET /api/user/all - Get all users (must be before /:id route)
 router.get('/all', requireAdmin, getAllUsers);
+
+// DELETE /api/user - Delete all users (admin only)
+router.delete('/', requireAdmin, deleteAllUsers);
 
 // GET /api/user/:id - Get user by ID (public emergency profile)
 router.get('/:id', getUserById);
