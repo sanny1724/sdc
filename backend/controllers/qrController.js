@@ -1,4 +1,5 @@
 import { generateQRCode } from '../utils/qrGenerator.js';
+import User from '../models/User.js';
 import os from 'os';
 
 // Helper function to get local IP address
@@ -27,6 +28,22 @@ export const generateQR = async (req, res) => {
       });
     }
 
+    // Try to fetch minimal fields to embed into the QR URL as a fallback
+    let minimal = null;
+    try {
+      const u = await User.findById(id).select('name bloodGroup emergencyContact');
+      if (u) {
+        minimal = {
+          n: encodeURIComponent(u.name || ''),
+          bg: encodeURIComponent(u.bloodGroup || ''),
+          ecn: encodeURIComponent(u.emergencyContact?.name || ''),
+          ecp: encodeURIComponent(u.emergencyContact?.phone || '')
+        };
+      }
+    } catch (_err) {
+      // ignore lookup failure; still generate URL without params
+    }
+
     // Generate URL that points to the public profile page
     // Use local IP if FRONTEND_URL contains localhost, otherwise use the configured URL
     let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -37,7 +54,9 @@ export const generateQR = async (req, res) => {
       frontendUrl = frontendUrl.replace('localhost', localIP).replace('127.0.0.1', localIP);
     }
     
-    const profileUrl = `${frontendUrl}/profile/${id}`;
+    // Build URL with minimal query fallback so mobile scan can render even if API is unreachable
+    const query = minimal ? `?n=${minimal.n}&bg=${minimal.bg}&ecn=${minimal.ecn}&ecp=${minimal.ecp}` : '';
+    const profileUrl = `${frontendUrl}/profile/${id}${query}`;
     
     // Generate QR code
     const qrCodeDataURL = await generateQRCode(profileUrl);

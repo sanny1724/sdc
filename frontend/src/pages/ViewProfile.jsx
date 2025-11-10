@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ProfileCard from '../components/ProfileCard';
 
@@ -18,6 +18,7 @@ const getApiUrl = () => {
 
 const ViewProfile = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,7 +45,28 @@ const ViewProfile = () => {
     } catch (error) {
       console.error('Error fetching user:', error);
       console.error('Error response:', error.response); // Debug log
-      
+
+      // Fallback: parse minimal fields from query params embedded in QR URL
+      const params = new URLSearchParams(location.search);
+      const name = params.get('n');
+      const bloodGroup = params.get('bg');
+      const ecn = params.get('ecn');
+      const ecp = params.get('ecp');
+      if (name || bloodGroup || ecn || ecp) {
+        setUser({
+          name: decodeURIComponent(name || ''),
+          bloodGroup: decodeURIComponent(bloodGroup || ''),
+          emergencyContact: {
+            name: decodeURIComponent(ecn || ''),
+            phone: decodeURIComponent(ecp || '')
+          }
+        });
+        setError(null);
+        setErrorDetails(null);
+        setLoading(false);
+        return;
+      }
+
       if (error.response) {
         // Server responded with error
         setError(`Error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`);
@@ -74,7 +96,7 @@ const ViewProfile = () => {
     );
   }
 
-  if (error) {
+  if (error && !user) {
     return (
       <div className="min-h-screen py-12 px-4 flex items-center justify-center">
         <div className="text-center max-w-md">
