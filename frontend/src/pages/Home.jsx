@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Activity, QrCode, ShieldPlus } from 'lucide-react';
 import axios from 'axios';
 
 // Determine API base
@@ -27,6 +28,14 @@ const Home = () => {
     visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
   };
 
+  // Floating gradient particles
+  const particles = [
+    { size: 14, x: '10%', y: '12%', from: '#6366F1', to: '#8B5CF6', delay: 0 },
+    { size: 10, x: '22%', y: '70%', from: '#06B6D4', to: '#3B82F6', delay: 1.2 },
+    { size: 18, x: '78%', y: '20%', from: '#8B5CF6', to: '#06B6D4', delay: 0.6 },
+    { size: 12, x: '85%', y: '66%', from: '#3B82F6', to: '#6366F1', delay: 1.8 },
+  ];
+
   return (
     <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Floating glow background */}
@@ -42,6 +51,24 @@ const Home = () => {
         }}
       />
 
+      {/* Floating particles */}
+      {particles.map((p, i) => (
+        <motion.span
+          key={i}
+          initial={{ y: 0 }}
+          animate={{ y: [-6, 6, -6] }}
+          transition={{ duration: 6 + i, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
+          className="pointer-events-none absolute rounded-full blur-md opacity-60"
+          style={{
+            width: p.size,
+            height: p.size,
+            left: p.x,
+            top: p.y,
+            background: `linear-gradient(135deg, ${p.from}, ${p.to})`
+          }}
+        />
+      ))}
+
       <div className="relative max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-14">
@@ -52,7 +79,14 @@ const Home = () => {
               animate="visible"
               className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 bg-clip-text text-transparent tracking-tight"
             >
-              Life Code
+              <motion.span
+                animate={{ backgroundPositionX: ['0%', '100%', '0%'] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                className="bg-clip-text text-transparent bg-[length:200%_100%] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500"
+                style={{ WebkitBackgroundClip: 'text' }}
+              >
+                Life Code
+              </motion.span>
             </motion.h1>
             <motion.p
               variants={fadeUp}
@@ -81,7 +115,10 @@ const Home = () => {
                            bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all"
               >
                 <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-md bg-gradient-to-r from-indigo-400/40 to-purple-400/40" />
-                <span className="relative">Register Now</span>
+                <span className="relative flex items-center gap-2">
+                  <ShieldPlus className="w-5 h-5" />
+                  Register Now
+                </span>
               </Link>
               <Link
                 to="/about"
@@ -136,7 +173,7 @@ const Home = () => {
                   <rect x="180" y="100" width="20" height="20" fill="#111827" rx="4" />
                 </svg>
               </motion.div>
-              <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-indigo-200/40 via-purple-200/40 to-blue-200/40 blur-2xl" />
+              <div className="absolute -inset-2 -z-10 rounded-3xl bg-gradient-to-tr from-indigo-200/50 via-purple-200/50 to-cyan-200/50 blur-2xl" />
             </div>
           </motion.div>
         </div>
@@ -150,27 +187,21 @@ const Home = () => {
             {
               title: 'Quick Registration',
               text: 'Register your emergency information in minutes with our simple form.',
-              iconStroke: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              ),
+              icon: <Activity className="w-6 h-6 text-gray-800" />,
               color: 'from-indigo-500 to-purple-500',
               bg: 'bg-indigo-50'
             },
             {
               title: 'QR Code Generation',
               text: 'Get your personalized QR code instantly after registration.',
-              iconStroke: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              ),
+              icon: <QrCode className="w-6 h-6 text-gray-800" />,
               color: 'from-purple-500 to-indigo-500',
               bg: 'bg-purple-50'
             },
             {
               title: 'Life-Saving Info',
               text: 'Critical information accessible instantly when needed most.',
-              iconStroke: (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              ),
+              icon: <ShieldPlus className="w-6 h-6 text-gray-800" />,
               color: 'from-cyan-500 to-blue-500',
               bg: 'bg-cyan-50'
             }
@@ -184,11 +215,9 @@ const Home = () => {
               custom={idx + 1}
               className="group"
             >
-              <div className="relative bg-white rounded-2xl shadow-lg p-6 transition-all hover:shadow-2xl hover:-translate-y-1">
+              <div className="relative bg-white/80 backdrop-blur rounded-2xl shadow-lg p-6 transition-all hover:shadow-2xl hover:-translate-y-1">
                 <div className={`w-12 h-12 ${card.bg} rounded-xl flex items-center justify-center mb-4`}>
-                  <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {card.iconStroke}
-                  </svg>
+                  {card.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">{card.title}</h3>
                 <p className="text-gray-600">{card.text}</p>
